@@ -1,0 +1,11 @@
+postgres:
+    image: postgres:12
+    ports:
+        - '5433:5432'
+    environment: 
+        POSTGRES_USER: 'postgres'
+        POSTGRES_PASSWORD: 'secret'
+        POSTGRES_DB: 'blockbuster'
+    volumes:
+        - ./init:/docker-entrypoint-initdb.d/
+#sudo docker-compose -f docker-compose.yml up

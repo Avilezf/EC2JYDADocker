@@ -1,0 +1,54 @@
+version: '3.3'
+
+services: 
+    postgres:
+        image: postgres:12
+        ports:
+            - '5433:5432'
+        environment: 
+            POSTGRES_USER: 'postgres'
+            POSTGRES_PASSWORD: 'secret'
+            POSTGRES_DB: 'blockbuster'
+        volumes:
+            - ./pgdocker/init:/docker-entrypoint-initdb.d/
+    #sudo docker-compose -f docker-compose.yml up
+  
+  dash:
+    build: ./dash
+    volumes: 
+      - ./dashdocker/dash:/app 
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    restart: on-failure
+    links: 
+        - postgres
+
+    #networks:
+    #  vpcbr:
+    #    ipv4_address: 10.5.0.6
+
+  jupyter:
+    build: ./python-docker
+    volumes:
+      - ./jupydocker:/home/jupyter
+    ports:
+      - 8888:8888
+    depends_on:
+      - postgres
+    links: 
+        - postgres
+
+    #networks:
+     # vpcbr:
+     #   ipv4_address: 10.5.0.7
+
+
+#networks:
+#  vpcbr:
+#    driver: bridge
+#    ipam:
+#     config:
+#      - subnet: 10.5.0.0/16
+#         #gateway: 10.5.0.1
