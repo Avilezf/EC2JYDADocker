@@ -22,7 +22,7 @@ app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:your_password@localhost/test"
 
 # for your live Heroku PostgreSQL database
-app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:secret@localhost:5433/blockbuster"
+app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:secret@postgres:5433/blockbuster"
 
 db = SQLAlchemy(app.server)
 
