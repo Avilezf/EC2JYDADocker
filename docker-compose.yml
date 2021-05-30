@@ -11,25 +11,10 @@ services:
           POSTGRES_DB: 'blockbuster'
       volumes:
           - ./pgdocker/init:/docker-entrypoint-initdb.d/
-<<<<<<< HEAD
     # docker-compose -f docker-compose.yml up
   
-  # dash:
-  #   build: ./dash
-  #   volumes: 
-  #     - ./dashdocker/dash:/app 
-  #   ports:
-  #     - 8000:8000
-  #   depends_on:
-  #     - postgres
-  #   restart: on-failure
-  #   links: 
-  #       - postgres
-=======
-  #sudo docker-compose -f docker-compose.yml up
-  
   dash:
-    build: ./dashdocker
+    build: ./dash
     volumes: 
       - ./dashdocker/dash:/app 
     ports:
@@ -39,7 +24,6 @@ services:
     restart: on-failure
     links: 
         - postgres
->>>>>>> f825ef36d0c74f8fda681ef219c7fa90e8058aa9
 
     #networks:
     #  vpcbr:
