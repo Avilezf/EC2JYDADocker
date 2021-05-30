@@ -14,7 +14,7 @@ services:
     # docker-compose -f docker-compose.yml up
   
   dash:
-    build: ./dash
+    build: ./dashdocker
     volumes: 
       - ./dashdocker/dash:/app 
     ports:
