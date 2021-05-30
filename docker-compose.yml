@@ -16,7 +16,7 @@ services:
   dash:
     build: ./dashdocker
     volumes: 
-      - ./dashdocker/dash:/app 
+      - ./dashdocker/dash:/app/dash
     ports:
       - 8000:8000
     depends_on:
@@ -32,7 +32,7 @@ services:
   jupyter:
     build: ./jupydocker
     volumes:
-      - ./slides:/home/jupyter
+      - ./jupydocker/slides:/home/jupyter
     ports:
       - 8888:8888
     depends_on:
