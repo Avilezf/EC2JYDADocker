@@ -7,6 +7,7 @@ import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import psycopg2
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
@@ -21,7 +22,7 @@ app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:your_password@localhost/test"
 
 # for your live Heroku PostgreSQL database
-app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgres://postgres:secret@localhost:5433/Blockbuster"
+app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:secret@localhost:5433/blockbuster"
 
 db = SQLAlchemy(app.server)
 
@@ -60,12 +61,16 @@ app.layout = html.Div([
     html.Button('Add Row', id='editing-rows-button', n_clicks=0),
     html.Button('Save to PostgreSQL', id='save_to_postgres', n_clicks=0),
 
-    # Create notification when saving to excel
+   # Create notification when saving to excel
     html.Div(id='placeholder', children=[]),
     dcc.Store(id="store", data=0),
     dcc.Interval(id='interval', interval=1000),
 
-    dcc.Graph(id='my_graph')
+    dcc.Graph(id='my_graph'),
+    dcc.Graph(id='my_graph2'),
+    dcc.Graph(id='my_graph3'),
+    
+   
 
 ])
 
@@ -81,10 +86,9 @@ def populate_datatable(n_intervals):
         dash_table.DataTable(
             id='our-table',
             columns=[{
+                         'name': str(x),
                          'id': str(x),
-                         'fistname': str(x),
-                         'lastname': str(x),
-                         'update': str(x),
+                         'deletable': False,
                      } 
                      for x in df.columns],
             data=df.to_dict('records'),
@@ -95,13 +99,8 @@ def populate_datatable(n_intervals):
             sort_mode="single",  # sort across 'multi' or 'single' columns
             page_action='none',  # render all of the data at once. No paging.
             style_table={'height': '300px', 'overflowY': 'auto'},
-            style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px'},
-            style_cell_conditional=[
-                {
-                    'if': {'column_id': c},
-                    'textAlign': 'right'
-                } for c in ['Price', 'Sales']
-            ]
+            style_cell={'textAlign': 'left', 'minWidth': '100px', 'width': '100px', 'maxWidth': '100px'}
+            
 
         ),
     ]
@@ -134,20 +133,121 @@ def add_row(n_clicks, rows, columns):
     return rows
 
 
-# @app.callback(
-#     Output('my_graph', 'figure'),
-#     [Input('our-table', 'data')],
-#     prevent_initial_call=True)
-# def display_graph(data):
-#     # df_fig = pd.DataFrame(data)
-#     # fig = px.bar(df_fig, x='Phone', y='Sales')
+@app.callback(
+    Output('my_graph', 'figure'),
+    [Input('our-table', 'data')],
+    prevent_initial_call=True)
+def display_graph(data):
+    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+    cursor1=conexion1.cursor()
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2006'")
+    year2 = 0
+    for fila in cursor1:
+        year2 = fila
+    year2 = year2[0]
+        
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005'")
+    year1 = 0
+    for fila in cursor1:
+        year1 = fila
+    year1 = year1[0]
 
-#     pg_filtered = db.session.query(Actor.First_name, Actor.Sales)
-#     phone_c = [x.Phone for x in pg_filtered]
-#     sales_c = [x.Sales for x in pg_filtered]
-#     fig = go.Figure([go.Bar(x=phone_c, y=sales_c)])
+    years = list([{'2005':int(year1)}, {'2006':int(year2)}])
+    conexion1.close()   
 
-#     return fig
+     #------------------------------------------------------------------------------------------------
+
+    objects = list(x for sublist in years for x in sublist.keys())
+    y_pos = range(len(objects))
+    vals = [x for sublist in years for x in sublist.values()]
+    fig = go.Figure([go.Bar(x=objects, y=vals)])
+
+    return fig
+
+ #-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@app.callback(
+    Output('my_graph2', 'figure'),
+    [Input('our-table', 'data')],
+    prevent_initial_call=True)
+def display_graph(data):
+    months = []
+    month = 0
+    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+
+    cursor1=conexion1.cursor()
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005' and extract(month from rental_date) = '05'")
+    for fila in cursor1:
+        month = fila
+    month = month[0]
+    months.append(month)
+        
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005' and extract(month from rental_date) = '06'")
+    for fila in cursor1:
+        month = fila
+    month = month[0]
+    months.append(month)
+
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005' and extract(month from rental_date) = '07'")
+    for fila in cursor1:
+        month = fila
+    month = month[0]
+    months.append(month)
+
+    cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005' and extract(month from rental_date) = '08'")
+    for fila in cursor1:
+        month = fila
+    month = month[0]
+    months.append(month)
+
+    months = list([{'Mayo':int(months[0])}, {'Junio':int(months[1])}, {'Julio':int(months[2])}, {'Agosto':int(months[3])}])
+    conexion1.close()  
+
+    #------------------------------------------------------------------------------------------------
+
+    objects = list(x for sublist in months for x in sublist.keys())
+    y_pos = range(len(objects))
+    vals = [x for sublist in months for x in sublist.values()]
+    fig = go.Figure([go.Bar(x=objects, y=vals)])
+
+    return fig
+
+@app.callback(
+    Output('my_graph3', 'figure'),
+    [Input('our-table', 'data')],
+    prevent_initial_call=True)
+def display_graph(data):
+    customers = []
+    customer = 0
+    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+
+    cursor1=conexion1.cursor()
+    cursor1.execute("select count(*) from customer where active = '0'")
+    for fila in cursor1:
+        customer = fila
+    customer = customer[0]
+    customers.append(customer)
+        
+    cursor1.execute("select count(*) from customer where active = '1'")
+    for fila in cursor1:
+        customer = fila
+    customer = customer[0]
+    customers.append(customer)
+
+
+    customers = list([{'No Activo':int(customers[0])}, {'Activo':int(customers[1])}])
+    conexion1.close()
+
+    #------------------------------------------------------------------------------------------------
+
+    objects = list(x for sublist in customers for x in sublist.keys())
+    y_pos = range(len(objects))
+    vals = [x for sublist in customers for x in sublist.values()]
+
+    fig = go.Figure([go.Pie(labels=objects, values=vals)])
+
+    return fig
+
 
 
 @app.callback(
