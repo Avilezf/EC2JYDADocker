@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import psycopg2
+import os
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
@@ -21,8 +22,9 @@ app.server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # for your home PostgreSQL test table
 # app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:your_password@localhost/test"
 
+database= os.environ.get('postgres')
 # for your live Heroku PostgreSQL database
-app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:secret@postgres:5433/blockbuster"
+app.server.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:secret@postgres:5432/blockbuster"
 
 db = SQLAlchemy(app.server)
 
@@ -138,7 +140,7 @@ def add_row(n_clicks, rows, columns):
     [Input('our-table', 'data')],
     prevent_initial_call=True)
 def display_graph(data):
-    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+    conexion1 = psycopg2.connect(database="blockbuster", host='postgres', user="postgres", password="secret", port="5432")
     cursor1=conexion1.cursor()
     cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2006'")
     year2 = 0
@@ -173,7 +175,7 @@ def display_graph(data):
 def display_graph(data):
     months = []
     month = 0
-    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+    conexion1 = psycopg2.connect(database="blockbuster", host='postgres', user="postgres", password="secret", port="5432")
 
     cursor1=conexion1.cursor()
     cursor1.execute("select count(*) from rental  where extract(year from rental_date) = '2005' and extract(month from rental_date) = '05'")
@@ -219,7 +221,7 @@ def display_graph(data):
 def display_graph(data):
     customers = []
     customer = 0
-    conexion1 = psycopg2.connect(database="blockbuster", user="postgres", password="secret", port="5433")
+    conexion1 = psycopg2.connect(database="blockbuster", host='postgres', user="postgres", password="secret", port="5432")
 
     cursor1=conexion1.cursor()
     cursor1.execute("select count(*) from customer where active = '0'")
@@ -281,4 +283,4 @@ def df_to_csv(n_clicks, n_intervals, dataset, s):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0')

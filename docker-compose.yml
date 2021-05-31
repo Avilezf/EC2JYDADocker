@@ -2,6 +2,7 @@ version: '3.7'
 
 services: 
   postgres:
+      container_name: postgres
       image: postgres:12
       ports:
           - '5433:5432'
@@ -10,15 +11,18 @@ services:
           POSTGRES_PASSWORD: 'secret'
           POSTGRES_DB: 'blockbuster'
       volumes:
+          - ./pgdocker/pgdata:/var/lib/postgresql/data
           - ./pgdocker/init:/docker-entrypoint-initdb.d/
+          
     # docker-compose -f docker-compose.yml up
   
   dash:
+    container_name: dash
     build: ./dashdocker
     volumes: 
-      - ./dashdocker/dash:/app/dash
+      - ./dashdocker/slides:/app/dash
     ports:
-      - 8000:8000
+      - 8050:8050
     depends_on:
       - postgres
     restart: on-failure
@@ -30,6 +34,7 @@ services:
     #    ipv4_address: 10.5.0.6
 
   jupyter:
+    container_name: jupyter
     build: ./jupydocker
     volumes:
       - ./jupydocker/slides:/home/jupyter

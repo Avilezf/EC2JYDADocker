@@ -1,5 +1,5 @@
 FROM python:3.6-slim
-RUN pip install jupyter numpy matplotlib rise
+RUN pip install jupyter numpy matplotlib rise psycopg2
 COPY . .
 WORKDIR /slides/
 
